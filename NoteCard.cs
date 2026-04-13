@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -7,7 +7,7 @@ namespace TrelloAppMinh
     public partial class NoteCard : UserControl
     {
 
-        // --- 1. TẠO "CỬA GIAO TIẾP" ĐỂ FORM1 TRUYỀN DỮ LIỆU ---
+        // 1. TẠO "CỬA GIAO TIẾP" ĐỂ FORM1 TRUYỀN DỮ LIỆU
         public string Title
         {
             get { return txtTitle.Text; }
@@ -26,20 +26,17 @@ namespace TrelloAppMinh
             set { lblDate.Text = value; }
         }
 
-        // Đây chính là con chip kết nối giao diện với phần dữ liệu chạy ngầm
         public CardNode NodeData { get; set; }
 
-
-
-        // --- 2. HÀM KHỞI TẠO (Đã kết hợp code cũ của bạn) ---
+        // 2. HÀM KHỞI TẠO
         public NoteCard(CardNode node)
         {
             InitializeComponent();
-            // --- THÊM 3 DÒNG NÀY ĐỂ ÉP KẾT NỐI NÚT BẤM ---
+
+            // Hàm kết nối nút bấm
             btnRead.Click += btnRead_Click;
             btnAddFile.Click += btnAddFile_Click;
             btnOpen.Click += btnOpen_Click;
-            // ---------------------------------------------
 
             NodeData = node;
             Title = node.Title;
@@ -68,13 +65,13 @@ namespace TrelloAppMinh
             txtMessage.DragDrop += The_BaoNhaChuot;
         }
 
-        // --- 3. XỬ LÝ KÉO THẢ TẠI CHỖ (Tính năng xịn của Hello Universe) ---
+        // 3. XỬ LÝ KÉO THẢ TẠI CHỖ
         private void The_BaoCoVatBayQua(object sender, DragEventArgs e)
         {
             // Kiểm tra xem đồ đang bị kéo lơ lửng có đúng là NoteCard không
             if (e.Data.GetDataPresent(typeof(NoteCard)))
             {
-                e.Effect = DragDropEffects.Move; // Đổi icon chuột
+                e.Effect = DragDropEffects.Move;
             }
         }
 
@@ -101,14 +98,13 @@ namespace TrelloAppMinh
                 if (mainForm != null)
                 {
                     mainForm.SyncDataFromUI();
-                    mainForm.btnSave_Click(null, null); // Lưu ngầm không hiện thông báo
+                    mainForm.btnSave_Click(null, null);
                 }
             }
         }
 
-        // --- 4. CHỨC NĂNG CÁC NÚT BẤM VÀ TƯƠNG TÁC ---
+        // 4. CHỨC NĂNG CÁC NÚT BẤM VÀ TƯƠNG TÁC
 
-        // Khi người dùng bấm giữ chuột trái vào Tiêu đề để nhấc thẻ đi
         private void txtTitle_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -120,8 +116,6 @@ namespace TrelloAppMinh
         // Nút Read
         private void btnRead_Click(object sender, EventArgs e)
         {
-            // Lệnh này phát ra tín hiệu "Cái thẻ vừa bị click" 
-            // Ngay lập tức Form1 sẽ bắt được tín hiệu và đưa chữ lên TextBox để bạn Update
             this.OnClick(e);
         }
 
@@ -133,7 +127,6 @@ namespace TrelloAppMinh
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                // Lưu đường dẫn thẳng vào Linh hồn (NodeData)
                 if (NodeData != null)
                 {
                     NodeData.AttachedFilePath = ofd.FileName;
@@ -150,7 +143,6 @@ namespace TrelloAppMinh
         // Nút Open File
         private void btnOpen_Click(object sender, EventArgs e)
         {
-            // Lấy đường dẫn từ Linh hồn (NodeData) ra để mở
             if (NodeData == null || string.IsNullOrWhiteSpace(NodeData.AttachedFilePath))
             {
                 MessageBox.Show("Thẻ này chưa có file nào được đính kèm!", "Thông báo");
