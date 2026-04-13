@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -15,10 +15,9 @@ namespace TrelloAppMinh
             return null;
         }
 
-        // Biến để nhớ xem người dùng đang chọn (Read) cái thẻ nào
         private NoteCard currentSelectedCard = null;
 
-        // --- KHAI BÁO 3 BỘ NÃO (LINKED LIST) QUẢN LÝ DỮ LIỆU ---
+        // KHAI BÁO 3 BỘ NÃO (LINKED LIST) QUẢN LÝ DỮ LIỆU 
         CardLinkedList listToDo = new CardLinkedList();
         CardLinkedList listDoing = new CardLinkedList();
         CardLinkedList listDone = new CardLinkedList();
@@ -49,19 +48,15 @@ namespace TrelloAppMinh
 
             string currentDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
 
-            // 1. Tạo một Node dữ liệu và ném nó vào danh sách TO DO
             CardNode newNode = new CardNode(txtTitle.Text, txtMessage.Text, currentDate, "TODO");
             listToDo.AddLast(newNode);
 
-            // 2. Tạo thẻ UI để hiển thị cho người dùng xem
             NoteCard uiCard = new NoteCard(newNode);
 
-            // Cắm dây điện cho thẻ UI (Click để đọc, Chuột xuống để kéo)
             uiCard.Click += Card_OnReadClick;
             uiCard.MouseDown += Card_MouseDown;
             foreach (Control c in uiCard.Controls)
             {
-                // Vẫn cho phép click vào chữ/nút để đọc thẻ
                 c.Click += (s, args) => Card_OnReadClick(uiCard, args);
 
                 if (!(c is Button))
@@ -131,17 +126,13 @@ namespace TrelloAppMinh
             NoteCard clickedCard = sender as NoteCard;
             if (clickedCard != null)
             {
-                // 1. Dọn dẹp sạch sẽ giao diện cũ trước (xóa text cũ, xóa màu highlight cũ)
                 ResetInputs();
 
-                // 2. Ghi nhận thẻ đang được chọn mới
                 currentSelectedCard = clickedCard;
 
-                // 3. Đưa dữ liệu ngược lên Textbox (Lúc này text sẽ không bị xóa nữa)
                 txtTitle.Text = clickedCard.NodeData.Title;
                 txtMessage.Text = clickedCard.NodeData.Message;
 
-                // 4. Đổi màu thẻ sang xanh dương nhạt để người dùng biết đang chọn thẻ nào
                 clickedCard.BackColor = Color.LightBlue;
             }
         }
@@ -151,15 +142,12 @@ namespace TrelloAppMinh
         {
             if (currentSelectedCard != null)
             {
-                // Cập nhật "Linh hồn" (Data chạy ngầm)
                 currentSelectedCard.NodeData.Title = txtTitle.Text;
                 currentSelectedCard.NodeData.Message = txtMessage.Text;
 
-                // Cập nhật "Thể xác" (UI)
                 currentSelectedCard.Controls["txtTitle"].Text = txtTitle.Text;
                 currentSelectedCard.Controls["txtMessage"].Text = txtMessage.Text;
 
-                // Tự động lưu file
                 btnSave_Click(null, null);
 
                 MessageBox.Show("Đã cập nhật thẻ thành công!");
@@ -293,7 +281,6 @@ namespace TrelloAppMinh
                 }
             }
 
-            // Lưu ý: Nếu nút New của bạn tên khác thì hãy đổi chữ btnNew nhé
             if (this.Controls.ContainsKey("btnNew"))
             {
                 Button newBtn = (Button)this.Controls["btnNew"];
@@ -389,7 +376,6 @@ namespace TrelloAppMinh
                 {
                     c.Click += (s, args) => Card_OnReadClick(card, args);
 
-                    // VÁ LỖI: Trừ nút bấm ra, còn lại mới cho kéo thả
                     if (!(c is Button))
                     {
                         c.MouseDown += (s, args) => Card_MouseDown(card, (MouseEventArgs)args);
@@ -411,7 +397,7 @@ namespace TrelloAppMinh
             listDoing.SelectionSort();
             listDone.SelectionSort();
 
-            // 3. Xóa bài làm lại: Vẽ lại toàn bộ màn hình theo thứ tự mới
+            // 3. Vẽ lại toàn bộ màn hình theo thứ tự mới
             ReloadPanel(flowToDo, listToDo);
             ReloadPanel(flowDoing, listDoing);
             ReloadPanel(flowDone, listDone);
@@ -419,30 +405,26 @@ namespace TrelloAppMinh
             // 4. Tự động lưu kết quả mới mượt mà vào ổ cứng
             btnSave_Click(null, null);
 
-            // Thông báo một lần duy nhất
             MessageBox.Show("Đã sắp xếp toàn bộ bảng Trello theo thứ tự A-Z!", "Hoàn tất");
         }
 
         public void SyncDataFromUI()
         {
-            // 1. Cắt đứt toàn bộ dây xích cũ bị lỗi
             listToDo.Clear();
             listDoing.Clear();
             listDone.Clear();
 
-            // 2. Nối lại dây xích TODO chuẩn theo đúng màn hình
             foreach (Control c in flowToDo.Controls)
             {
                 if (c is NoteCard card)
                 {
                     card.NodeData.Status = "TODO";
-                    card.NodeData.Prev = null; // Cực kỳ quan trọng để cắt đứt đuôi lỗi
+                    card.NodeData.Prev = null; 
                     card.NodeData.Next = null;
                     listToDo.AddLast(card.NodeData);
                 }
             }
 
-            // 3. Nối lại dây xích DOING
             foreach (Control c in flowDoing.Controls)
             {
                 if (c is NoteCard card)
@@ -454,7 +436,6 @@ namespace TrelloAppMinh
                 }
             }
 
-            // 4. Nối lại dây xích DONE
             foreach (Control c in flowDone.Controls)
             {
                 if (c is NoteCard card)
