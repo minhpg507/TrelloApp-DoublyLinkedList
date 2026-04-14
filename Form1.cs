@@ -120,24 +120,7 @@ namespace TrelloAppMinh
             }
         }
 
-        // III. CHỨC NĂNG READ 
-        private void Card_OnReadClick(object sender, EventArgs e)
-        {
-            NoteCard clickedCard = sender as NoteCard;
-            if (clickedCard != null)
-            {
-                ResetInputs();
-
-                currentSelectedCard = clickedCard;
-
-                txtTitle.Text = clickedCard.NodeData.Title;
-                txtMessage.Text = clickedCard.NodeData.Message;
-
-                clickedCard.BackColor = Color.LightBlue;
-            }
-        }
-
-        // IV. CHỨC NĂNG UPDATE
+        // III. CHỨC NĂNG UPDATE
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             if (currentSelectedCard != null)
@@ -159,7 +142,7 @@ namespace TrelloAppMinh
             }
         }
 
-        // V. CHỨC NĂNG DELETE
+        // IV. CHỨC NĂNG DELETE
         private void btnDelete_Click(object sender, EventArgs e)
         {
             if (currentSelectedCard == null)
@@ -188,7 +171,134 @@ namespace TrelloAppMinh
             }
         }
 
-        // VI. HỆ THỐNG KÉO THẢ (DRAG & DROP)
+        // V. CHỨC NĂNG EXPORT FILE
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            if (currentSelectedCard == null)
+            {
+                MessageBox.Show("Vui lòng click chọn thẻ bạn muốn xuất file trước!", "Thông báo");
+                return;
+            }
+
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Title = "Lưu thẻ này thành file";
+            sfd.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*";
+            sfd.FileName = currentSelectedCard.NodeData.Title + ".txt";
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(sfd.FileName))
+                    {
+                        sw.WriteLine("=========== THÔNG TIN CÔNG VIỆC ===========");
+                        sw.WriteLine("TIÊU ĐỀ: " + currentSelectedCard.NodeData.Title);
+                        sw.WriteLine("-------------------------------------------");
+                        sw.WriteLine("NỘI DUNG:");
+                        sw.WriteLine(currentSelectedCard.NodeData.Message);
+                        sw.WriteLine("===========================================");
+                    }
+                    MessageBox.Show("Đã xuất thẻ ra file thành công!", "Thông báo");
+                }
+                catch (Exception ex) { MessageBox.Show("Có lỗi khi lưu file: " + ex.Message, "Lỗi"); }
+            }
+        }
+
+        // VI. CHỨC NĂNG SORT A-Z (ÁP DỤNG SELECTION SORT)
+        private void btnSort_Click(object sender, EventArgs e)
+        {
+            SyncDataFromUI();
+
+            listToDo.SelectionSort();
+            listDoing.SelectionSort();
+            listDone.SelectionSort();
+
+            ReloadPanel(flowToDo, listToDo);
+            ReloadPanel(flowDoing, listDoing);
+            ReloadPanel(flowDone, listDone);
+
+            btnSave_Click(null, null);
+
+            MessageBox.Show("Đã sắp xếp toàn bộ bảng Trello theo thứ tự A-Z!", "Hoàn tất");
+        }
+
+        // ĐỒNG BỘ HÓA DỮ LIỆU TỪ GIAO DIỆN
+        public void SyncDataFromUI()
+        {
+            listToDo.Clear();
+            listDoing.Clear();
+            listDone.Clear();
+
+            foreach (Control c in flowToDo.Controls)
+            {
+                if (c is NoteCard card)
+                {
+                    card.NodeData.Status = "TODO";
+                    card.NodeData.Prev = null;
+                    card.NodeData.Next = null;
+                    listToDo.AddLast(card.NodeData);
+                }
+            }
+
+            foreach (Control c in flowDoing.Controls)
+            {
+                if (c is NoteCard card)
+                {
+                    card.NodeData.Status = "DOING";
+                    card.NodeData.Prev = null;
+                    card.NodeData.Next = null;
+                    listDoing.AddLast(card.NodeData);
+                }
+            }
+
+            foreach (Control c in flowDone.Controls)
+            {
+                if (c is NoteCard card)
+                {
+                    card.NodeData.Status = "DONE";
+                    card.NodeData.Prev = null;
+                    card.NodeData.Next = null;
+                    listDone.AddLast(card.NodeData);
+                }
+            }
+        }
+
+        // VII. CHỨC NĂNG SORT Z-A (ÁP DỤNG BUBBLE SORT)
+        private void btnSortZA_Click(object sender, EventArgs e)
+        {
+            SyncDataFromUI();
+
+            listToDo.BubbleSortZA();
+            listDoing.BubbleSortZA();
+            listDone.BubbleSortZA();
+
+            ReloadPanel(flowToDo, listToDo);
+            ReloadPanel(flowDoing, listDoing);
+            ReloadPanel(flowDone, listDone);
+
+            btnSave_Click(null, null);
+
+            MessageBox.Show("Đã sắp xếp toàn bộ bảng Trello theo thứ tự Z-A", "Hoàn tất");
+        }
+
+        // VIII. CHỨC NĂNG READ 
+        private void Card_OnReadClick(object sender, EventArgs e)
+        {
+            NoteCard clickedCard = sender as NoteCard;
+            if (clickedCard != null)
+            {
+                ResetInputs();
+
+                currentSelectedCard = clickedCard;
+
+                txtTitle.Text = clickedCard.NodeData.Title;
+                txtMessage.Text = clickedCard.NodeData.Message;
+
+                clickedCard.BackColor = Color.LightBlue;
+            }
+        }
+
+        // IX. HỆ THỐNG KÉO THẢ (DRAG & DROP)
         private void Card_MouseDown(object sender, MouseEventArgs e)
         {
             NoteCard cardToDrag = sender as NoteCard;
@@ -227,40 +337,7 @@ namespace TrelloAppMinh
             }
         }
 
-        // VII. CHỨC NĂNG EXPORT FILE
-        private void btnExport_Click(object sender, EventArgs e)
-        {
-            if (currentSelectedCard == null)
-            {
-                MessageBox.Show("Vui lòng click chọn thẻ bạn muốn xuất file trước!", "Thông báo");
-                return;
-            }
-
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Title = "Lưu thẻ này thành file";
-            sfd.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*";
-            sfd.FileName = currentSelectedCard.NodeData.Title + ".txt";
-
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(sfd.FileName))
-                    {
-                        sw.WriteLine("=========== THÔNG TIN CÔNG VIỆC ===========");
-                        sw.WriteLine("TIÊU ĐỀ: " + currentSelectedCard.NodeData.Title);
-                        sw.WriteLine("-------------------------------------------");
-                        sw.WriteLine("NỘI DUNG:");
-                        sw.WriteLine(currentSelectedCard.NodeData.Message);
-                        sw.WriteLine("===========================================");
-                    }
-                    MessageBox.Show("Đã xuất thẻ ra file thành công!", "Thông báo");
-                }
-                catch (Exception ex) { MessageBox.Show("Có lỗi khi lưu file: " + ex.Message, "Lỗi"); }
-            }
-        }
-
-        // VIII. CÁC NÚT SẮP XẾP VÀ LÀM ĐẸP
+        // X. CÁC NÚT SẮP XẾP VÀ LÀM ĐẸP
         private void ApplyTrelloStyle()
         {
             this.BackColor = Color.AliceBlue;
@@ -290,6 +367,7 @@ namespace TrelloAppMinh
             }
         }
 
+        // Giải mã và phục hồi dữ liệu từ ổ cứng
         private void LoadData()
         {
             string filePath = "data.txt";
@@ -325,7 +403,7 @@ namespace TrelloAppMinh
                             attachedPath = parts[4];
                         }
 
-                        // Nhồi attachedPath vào hàm khởi tạo
+                        // Đưa attachedPath vào hàm khởi tạo
                         CardNode loadedNode = new CardNode(title, message, date, status, attachedPath);
                         NoteCard card = new NoteCard(loadedNode);
                         card.Click += Card_OnReadClick;
@@ -363,6 +441,7 @@ namespace TrelloAppMinh
             catch (Exception ex) { MessageBox.Show("Lỗi tải file: " + ex.Message); }
         }
 
+        // Vẽ lại giao diện từ danh sách liên kết
         private void ReloadPanel(FlowLayoutPanel panel, CardLinkedList list)
         {
             panel.Controls.Clear();
@@ -385,88 +464,6 @@ namespace TrelloAppMinh
                 panel.Controls.Add(card);
                 current = current.Next;
             }
-        }
-
-        private void btnSort_Click(object sender, EventArgs e)
-        {
-            // 1. ÉP BUỘC ĐỒNG BỘ: Dọn sạch lỗi dây xích trước khi chạy thuật toán
-            SyncDataFromUI();
-
-            // 2. Chạy thuật toán Selection Sort cho cả 3 bộ não cùng lúc
-            listToDo.SelectionSort();
-            listDoing.SelectionSort();
-            listDone.SelectionSort();
-
-            // 3. Vẽ lại toàn bộ màn hình theo thứ tự mới
-            ReloadPanel(flowToDo, listToDo);
-            ReloadPanel(flowDoing, listDoing);
-            ReloadPanel(flowDone, listDone);
-
-            // 4. Tự động lưu kết quả mới mượt mà vào ổ cứng
-            btnSave_Click(null, null);
-
-            MessageBox.Show("Đã sắp xếp toàn bộ bảng Trello theo thứ tự A-Z!", "Hoàn tất");
-        }
-
-        public void SyncDataFromUI()
-        {
-            listToDo.Clear();
-            listDoing.Clear();
-            listDone.Clear();
-
-            foreach (Control c in flowToDo.Controls)
-            {
-                if (c is NoteCard card)
-                {
-                    card.NodeData.Status = "TODO";
-                    card.NodeData.Prev = null; 
-                    card.NodeData.Next = null;
-                    listToDo.AddLast(card.NodeData);
-                }
-            }
-
-            foreach (Control c in flowDoing.Controls)
-            {
-                if (c is NoteCard card)
-                {
-                    card.NodeData.Status = "DOING";
-                    card.NodeData.Prev = null;
-                    card.NodeData.Next = null;
-                    listDoing.AddLast(card.NodeData);
-                }
-            }
-
-            foreach (Control c in flowDone.Controls)
-            {
-                if (c is NoteCard card)
-                {
-                    card.NodeData.Status = "DONE";
-                    card.NodeData.Prev = null;
-                    card.NodeData.Next = null;
-                    listDone.AddLast(card.NodeData);
-                }
-            }
-        }
-
-        private void btnSortZA_Click(object sender, EventArgs e)
-        {
-            // 1. Đồng bộ dữ liệu
-            SyncDataFromUI();
-
-            // 2. Gọi thuật toán MỚI (Bubble Sort Z-A)
-            listToDo.BubbleSortZA();
-            listDoing.BubbleSortZA();
-            listDone.BubbleSortZA();
-
-            // 3. Vẽ lại màn hình
-            ReloadPanel(flowToDo, listToDo);
-            ReloadPanel(flowDoing, listDoing);
-            ReloadPanel(flowDone, listDone);
-
-            // 4. Lưu ổ cứng
-            btnSave_Click(null, null);
-
-            MessageBox.Show("Đã sắp xếp toàn bộ bảng Trello theo thứ tự Z-A", "Hoàn tất");
         }
     }
 }
