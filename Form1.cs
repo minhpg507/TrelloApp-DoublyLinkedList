@@ -67,10 +67,10 @@ namespace TrelloAppMinh
 
             uiCard.BackColor = Color.White;
 
-            // 3. Đưa thẻ UI vào cột CẦN LÀM trên màn hình
+            // Đưa thẻ UI vào cột CẦN LÀM trên màn hình
             flowToDo.Controls.Add(uiCard);
 
-            // 4. Xóa trắng form nhập
+            // Xóa trắng form nhập
             ResetInputs();
 
             // Tự động lưu
